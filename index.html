@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shelter Bingo 🇮🇱</title>
+  <meta name="description" content="Bomb Shelter Bingo - A game for what we do in the shelter. Stay safe, stay sane.">
+  <meta property="og:title" content="Shelter Bingo 🇮🇱">
+  <meta property="og:description" content="How many can you check off? Play Bomb Shelter Bingo.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 24px 16px 12px;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+    }
+    .hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.2rem;
+      color: #fbbf24;
+      text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
+      letter-spacing: 1px;
+    }
+    .hero .subtitle {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .hero .flag { font-size: 1.5rem; }
+
+    .controls {
+      display: flex; justify-content: center; gap: 10px;
+      padding: 12px 16px; flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 20px; border: none; border-radius: 8px;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-new { background: #fbbf24; color: #0f172a; }
+    .btn-new:hover { background: #f59e0b; transform: scale(1.05); }
+    .btn-share { background: #3b82f6; color: #fff; }
+    .btn-share:hover { background: #2563eb; transform: scale(1.05); }
+    .btn-reset { background: #475569; color: #fff; }
+    .btn-reset:hover { background: #64748b; }
+
+    .score-bar {
+      text-align: center; padding: 8px;
+      font-size: 0.85rem; color: #94a3b8;
+    }
+    .score-bar span { color: #fbbf24; font-weight: 800; font-size: 1.1rem; }
+
+    .board-container {
+      display: flex; justify-content: center; padding: 0 8px 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      max-width: 500px;
+      width: 100%;
+      aspect-ratio: 1;
+    }
+
+    .cell {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      line-height: 1.25;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .cell:hover { border-color: #fbbf24; }
+
+    .cell.marked {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      border-color: #22c55e;
+      color: #fff;
+      animation: pop 0.3s ease;
+    }
+
+    .cell.marked::after {
+      content: "✓";
+      position: absolute;
+      top: 2px; right: 4px;
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .cell.free {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-color: #fbbf24;
+      color: #0f172a;
+      font-weight: 800;
+      cursor: default;
+      font-size: 0.75rem;
+    }
+
+    .cell.bingo-cell {
+      animation: bingoGlow 1s ease infinite alternate;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes bingoGlow {
+      from { box-shadow: 0 0 8px #fbbf24; }
+      to { box-shadow: 0 0 20px #fbbf24, 0 0 40px rgba(251,191,36,0.3); }
+    }
+
+    /* Bingo overlay */
+    .bingo-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+    }
+    .bingo-overlay.show { display: flex; }
+    .bingo-text {
+      font-family: 'Fredoka One', cursive;
+      font-size: 4rem;
+      color: #fbbf24;
+      text-shadow: 3px 3px 0 #dc2626, -2px -2px 0 #dc2626;
+      animation: bingoPulse 0.5s ease infinite alternate;
+    }
+    .bingo-sub {
+      font-size: 1.2rem; color: #f8fafc;
+      margin-top: 12px; text-align: center;
+    }
+    .bingo-dismiss {
+      margin-top: 24px; padding: 14px 40px;
+      background: #fbbf24; color: #0f172a;
+      border: none; border-radius: 10px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2rem; cursor: pointer;
+    }
+    @keyframes bingoPulse {
+      from { transform: scale(1) rotate(-2deg); }
+      to { transform: scale(1.1) rotate(2deg); }
+    }
+
+    /* Share toast */
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #22c55e; color: #fff; padding: 12px 24px;
+      border-radius: 8px; font-weight: 700; font-size: 0.9rem;
+      display: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .toast.show { display: block; animation: fadeInUp 0.3s ease; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .footer {
+      text-align: center; padding: 16px;
+      font-size: 0.75rem; color: #475569;
+      border-top: 1px solid #1e293b;
+    }
+    .footer a { color: #64748b; text-decoration: none; }
+
+    /* Confetti canvas */
+    #confetti {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 999;
+    }
+
+    @media (min-width: 600px) {
+      .cell { font-size: 0.8rem; padding: 8px 6px; }
+      .hero h1 { font-size: 2.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="flag">🇮🇱</div>
+    <h1>SHELTER BINGO</h1>
+    <div class="subtitle">How many can you check off? Stay safe, stay sane.</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-new" onclick="newCard()">🎲 New Card</button>
+    <button class="btn btn-share" onclick="shareCard()">📤 Share</button>
+    <button class="btn btn-reset" onclick="resetMarks()">↩ Reset</button>
+  </div>
+
+  <div class="score-bar">Checked: <span id="checked-count">0</span> / 25 &nbsp;|&nbsp; Bingos: <span id="bingo-count">0</span></div>
+
+  <div class="board-container">
+    <div class="board" id="board"></div>
+  </div>
+
+  <div class="bingo-overlay" id="bingo-overlay">
+    <div class="bingo-text">BINGO! 🎉</div>
+    <div class="bingo-sub">You got a line! Share your card!</div>
+    <button class="bingo-dismiss" onclick="dismissBingo()">Keep Playing</button>
+  </div>
+
+  <canvas id="confetti"></canvas>
+  <div class="toast" id="toast">Link copied!</div>
+
+  <div class="footer">
+    Inspired by <a href="https://x.com/eaborations" target="_blank">@elieklein</a> · Credit: Eli Klein ·
+    <a href="/">What To Do In The Shelter</a>
+  </div>
+
+  <script>
+    // All possible bingo squares
+    const ALL_SQUARES = [
+      // From the original image
+      "Shower Interrupted by Siren",
+      "Slept in Bomb Shelter",
+      "Doomscrolled News",
+      "Startled by Siren in a Video",
+      "Meal Interrupted by Siren",
+      "Trouble Focu… wait, what's that?",
+      "Ice Cream as Therapy",
+      "Sleep Interrupted by Siren",
+      "Lay Next to Car During Siren",
+      "Sang in Bomb Shelter",
+      "Poop Interrupted by Siren",
+      "Doomscrolled Social Media",
+      "Annoyed by / Grateful for Pre-Alerts",
+      "Shared Food in Bomb Shelter",
+      "Meme Creation as Therapy",
+      "Exhausted but Defiant",
+      // User additions
+      "Left Shelter Before All Clear",
+      "Missed the All Clear",
+      "Startled by Sound Resembling Siren",
+      // More relatable squares
+      "Ran to Shelter in Pajamas",
+      "Debated if That Was a Siren",
+      "Phone Died in Shelter",
+      "Shelter Selfie",
+      "Made Friends in Shelter",
+      "Counted Booms from Shelter",
+      "Kids Slept Through a Siren",
+      "Forgot Something Outside During Siren",
+      "Coffee Interrupted by Siren",
+      "Zoom Call Interrupted by Siren",
+      "Became Shelter DJ",
+      "Argued About Shelter Door",
+      "Practiced Deep Breathing in Shelter",
+      "Explained Sirens to a Pet",
+      "Wore Mismatched Shoes to Shelter",
+      "Called Mom During Siren",
+      "Recognized Boom vs. Interception",
+      "Shower So Fast It's a Record",
+      "Ran with Wet Hair",
+      "Checked Red Alert App 50+ Times",
+      "Taught Someone the Shelter Routine",
+      "Stayed Calm for the Kids",
+      "Shelter Snack Stash",
+      "Fell Asleep in Shelter",
+      "Siren During a Date",
+      "Workout Interrupted by Siren",
+    ];
+
+    const FREE_SPACE = "🇮🇱\nFREE\nSTAY SAFE";
+    let board = [];
+    let marks = [];
+    let seed = 0;
+    let shownBingo = false;
+
+    // Seeded random for shareable cards
+    function seededRandom(s) {
+      return function() {
+        s = (s * 1664525 + 1013904223) & 0xFFFFFFFF;
+        return (s >>> 0) / 0xFFFFFFFF;
+      };
+    }
+
+    function shuffle(arr, rng) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function generateBoard(s) {
+      const rng = seededRandom(s);
+      const shuffled = shuffle(ALL_SQUARES, rng);
+      const selected = shuffled.slice(0, 24);
+      // Insert free space at center (index 12)
+      const b = [...selected.slice(0, 12), FREE_SPACE, ...selected.slice(12)];
+      return b;
+    }
+
+    function renderBoard() {
+      const container = document.getElementById("board");
+      container.innerHTML = "";
+      board.forEach((text, i) => {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        if (i === 12) {
+          cell.className += " free marked";
+          cell.innerHTML = text.replace(/\n/g, "<br>");
+        } else {
+          cell.textContent = text;
+          if (marks[i]) cell.classList.add("marked");
+          cell.addEventListener("click", () => toggleCell(i));
+        }
+        container.appendChild(cell);
+      });
+      updateScore();
+      checkBingo();
+    }
+
+    function toggleCell(i) {
+      if (i === 12) return;
+      marks[i] = !marks[i];
+      saveState();
+      renderBoard();
+    }
+
+    function updateScore() {
+      const count = marks.filter(Boolean).length;
+      document.getElementById("checked-count").textContent = count;
+    }
+
+    function checkBingo() {
+      const lines = [];
+      // Rows
+      for (let r = 0; r < 5; r++) {
+        lines.push([0,1,2,3,4].map(c => r * 5 + c));
+      }
+      // Columns
+      for (let c = 0; c < 5; c++) {
+        lines.push([0,1,2,3,4].map(r => r * 5 + c));
+      }
+      // Diagonals
+      lines.push([0, 6, 12, 18, 24]);
+      lines.push([4, 8, 12, 16, 20]);
+
+      let bingoCount = 0;
+      const bingoCells = new Set();
+
+      for (const line of lines) {
+        if (line.every(i => marks[i])) {
+          bingoCount++;
+          line.forEach(i => bingoCells.add(i));
+        }
+      }
+
+      document.getElementById("bingo-count").textContent = bingoCount;
+
+      // Add glow to bingo cells
+      document.querySelectorAll(".cell").forEach((cell, i) => {
+        if (bingoCells.has(i)) cell.classList.add("bingo-cell");
+      });
+
+      if (bingoCount > 0 && !shownBingo) {
+        shownBingo = true;
+        setTimeout(() => {
+          document.getElementById("bingo-overlay").classList.add("show");
+          launchConfetti();
+        }, 400);
+      }
+    }
+
+    function dismissBingo() {
+      document.getElementById("bingo-overlay").classList.remove("show");
+    }
+
+    function newCard() {
+      seed = Date.now() & 0xFFFFFF;
+      board = generateBoard(seed);
+      marks = new Array(25).fill(false);
+      marks[12] = true; // free space
+      shownBingo = false;
+      saveState();
+      renderBoard();
+      window.history.replaceState(null, "", `?s=${seed}`);
+    }
+
+    function resetMarks() {
+      marks = new Array(25).fill(false);
+      marks[12] = true;
+      shownBingo = false;
+      saveState();
+      renderBoard();
+    }
+
+    function shareCard() {
+      const url = `${window.location.origin}${window.location.pathname}?s=${seed}`;
+      if (navigator.share) {
+        navigator.share({
+          title: "Shelter Bingo 🇮🇱",
+          text: `I'm playing Shelter Bingo! ${marks.filter(Boolean).length}/25 checked. Can you beat me?`,
+          url
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(url).then(() => {
+          const toast = document.getElementById("toast");
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 2000);
+        });
+      }
+    }
+
+    function saveState() {
+      const state = { seed, marks };
+      localStorage.setItem("shelter-bingo", JSON.stringify(state));
+    }
+
+    function loadState() {
+      // Check URL for shared seed
+      const params = new URLSearchParams(window.location.search);
+      const urlSeed = params.get("s");
+
+      if (urlSeed) {
+        seed = parseInt(urlSeed) || Date.now();
+        board = generateBoard(seed);
+        marks = new Array(25).fill(false);
+        marks[12] = true;
+        // Check localStorage for marks on this seed
+        const saved = localStorage.getItem("shelter-bingo");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.seed === seed) marks = parsed.marks;
+        }
+      } else {
+        const saved = localStorage.getItem("shelter-bingo");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          seed = parsed.seed;
+          marks = parsed.marks;
+          board = generateBoard(seed);
+        } else {
+          newCard();
+          return;
+        }
+      }
+      renderBoard();
+    }
+
+    // Simple confetti
+    function launchConfetti() {
+      const canvas = document.getElementById("confetti");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const pieces = [];
+      const colors = ["#fbbf24", "#dc2626", "#3b82f6", "#22c55e", "#fff", "#0038b8"];
+
+      for (let i = 0; i < 120; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          w: Math.random() * 8 + 4,
+          h: Math.random() * 6 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vy: Math.random() * 3 + 2,
+          vx: (Math.random() - 0.5) * 2,
+          rot: Math.random() * 360,
+          vr: (Math.random() - 0.5) * 10,
+        });
+      }
+
+      let frame = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        for (const p of pieces) {
+          p.y += p.vy;
+          p.x += p.vx;
+          p.rot += p.vr;
+          p.vy += 0.05;
+          if (p.y < canvas.height + 20) alive = true;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        }
+        frame++;
+        if (alive && frame < 300) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      animate();
+    }
+
+    loadState();
+  </script>
+</body>
+</html>
