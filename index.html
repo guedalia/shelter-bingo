@@ -20,67 +20,23 @@
       overflow-x: hidden;
     }
 
-    /* Comic starburst header */
+    /* Header with original image */
     .hero {
-      background: #dc2626;
+      background: #fff8e1;
       text-align: center;
-      padding: 0;
-      position: relative;
-      overflow: hidden;
+      padding: 16px 16px 8px;
     }
 
-    .starburst {
-      background: #fbbf24;
-      padding: 28px 20px 22px;
-      position: relative;
-      clip-path: polygon(
-        50% 0%, 61% 8%, 72% 2%, 75% 14%, 88% 12%, 85% 24%,
-        97% 28%, 90% 38%, 100% 46%, 92% 54%, 98% 64%,
-        88% 68%, 92% 80%, 80% 78%, 76% 90%, 66% 84%,
-        58% 96%, 50% 86%, 42% 96%, 34% 84%, 24% 90%,
-        20% 78%, 8% 80%, 12% 68%, 2% 64%, 8% 54%,
-        0% 46%, 10% 38%, 3% 28%, 15% 24%, 12% 12%,
-        25% 14%, 28% 2%, 39% 8%
-      );
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .hero img {
+      max-width: 420px;
+      width: 90%;
+      height: auto;
     }
-
-    .hero-top {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 4px;
-    }
-
-    .bingo-card-icon {
-      font-size: 2.5rem;
-    }
-
-    .flag-icon {
-      font-size: 2.5rem;
-    }
-
-    .hero h1 {
-      font-family: 'Bangers', cursive;
-      font-size: 2.6rem;
-      color: #dc2626;
-      text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
-      letter-spacing: 3px;
-      line-height: 1;
-      -webkit-text-stroke: 1px #000;
-    }
-    .hero h1 .line1 { font-size: 1.8rem; color: #1a1a1a; display: block; letter-spacing: 6px; }
-    .hero h1 .line2 { font-size: 3.2rem; display: block; }
 
     .hero .subtitle {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: #92400e;
-      margin-top: 2px;
+      margin-top: 8px;
       font-weight: 700;
     }
 
@@ -294,17 +250,8 @@
 </head>
 <body>
   <div class="hero">
-    <div class="starburst">
-      <div class="hero-top">
-        <span class="bingo-card-icon">🎰</span>
-        <span class="flag-icon">🇮🇱</span>
-      </div>
-      <h1>
-        <span class="line1">BOMB SHELTER</span>
-        <span class="line2">BINGO</span>
-      </h1>
-      <div class="subtitle">How many can you check off? Stay safe, stay sane.</div>
-    </div>
+    <img src="header.png" alt="Bomb Shelter Bingo">
+    <div class="subtitle">How many can you check off? Stay safe, stay sane.</div>
   </div>
 
   <div class="controls">
